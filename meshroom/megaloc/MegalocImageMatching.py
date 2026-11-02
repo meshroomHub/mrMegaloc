@@ -11,7 +11,7 @@ class MegalocImageMatching(desc.CommandLineNode):
     Each view of the first folder is paired with its most similar views of the second folder.
     Use the same folder twice to match a set of views against itself.
     """
-    gpu = desc.Level.NORMAL
+    gpu = desc.Level.INTENSIVE
 
     exePath = (Path(__file__).absolute().parent.parent.parent / "python" / "imageMatching.py").as_posix()
 
