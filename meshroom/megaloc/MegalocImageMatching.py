@@ -2,6 +2,7 @@ __version__ = "1.0"
 
 from pathlib import Path
 from meshroom.core import desc
+from meshroom.core.utils import VERBOSE_LEVEL
 
 class MegalocImageMatching(desc.CommandLineNode):
 
@@ -43,6 +44,13 @@ class MegalocImageMatching(desc.CommandLineNode):
             description="Minimal cosine similarity between two views to keep a pair (applied on the nbNeighbors best views).",
             value=0.0,
             range=(-1.0, 1.0, 0.01),
+        ),
+        desc.ChoiceParam(
+            name="verboseLevel",
+            label="Verbose Level",
+            description="Verbosity level (fatal, error, warning, info, debug, trace).",
+            values=VERBOSE_LEVEL,
+            value="info",
         ),
     ]
 

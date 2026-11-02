@@ -76,15 +76,17 @@ def image_matching(descriptorsFolderA, descriptorsFolderB, nbNeighbors, minSimil
         raise RuntimeError(f"Unable to write pairs file {output}")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
     parser = argparse.ArgumentParser(description='Compute image pairs from two folders of MegaLoc descriptors')
     parser.add_argument('--descriptorsFolderA', type=str, required=True, help='Descriptors folder of the query views')
     parser.add_argument('--descriptorsFolderB', type=str, required=True, help='Descriptors folder of the views to match against')
     parser.add_argument('--nbNeighbors', type=int, default=20, help='Number of neighbors in B per view of A')
     parser.add_argument('--minSimilarity', type=float, default=0.0, help='Minimal cosine similarity to keep a pair')
     parser.add_argument('--output', type=str, required=True, help='Output image pairs file')
+    parser.add_argument('--verboseLevel', type=str, default='info', help='Verbosity level (fatal, error, warning, info, debug, trace)')
     args, _ = parser.parse_known_args()
+
+    # Python logging has no trace level
+    logging.basicConfig(level="DEBUG" if args.verboseLevel == "trace" else args.verboseLevel.upper())
 
     image_matching(descriptorsFolderA=args.descriptorsFolderA,
                    descriptorsFolderB=args.descriptorsFolderB,

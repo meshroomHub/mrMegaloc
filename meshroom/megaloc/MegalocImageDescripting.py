@@ -2,6 +2,7 @@ __version__ = "1.0"
 
 from pathlib import Path
 from meshroom.core import desc
+from meshroom.core.utils import VERBOSE_LEVEL
 from pyalicevision import parallelization as avpar
 
 class MegalocImageDescripting(desc.CommandLineNode):
@@ -35,6 +36,13 @@ class MegalocImageDescripting(desc.CommandLineNode):
             value=322,
             range=(112, 1036, 14),
             advanced=True,
+        ),
+        desc.ChoiceParam(
+            name="verboseLevel",
+            label="Verbose Level",
+            description="Verbosity level (fatal, error, warning, info, debug, trace).",
+            values=VERBOSE_LEVEL,
+            value="info",
         ),
     ]
 

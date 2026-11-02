@@ -84,15 +84,17 @@ def compute_descriptors(inputSfMData, imageSize, outputFolder, rangeIteration, r
         np.save(os.path.join(outputFolder, f"{viewId}.megaloc.npy"), descriptor.float().cpu().numpy())
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
     parser = argparse.ArgumentParser(description='Compute MegaLoc global descriptors for each view')
     parser.add_argument('--inputSfMData', type=str, required=True, help='Input sfmData')
     parser.add_argument('--imageSize', type=int, default=322, help='Square size images are resized to')
     parser.add_argument('--output', type=str, required=True, help='Output descriptors folder')
     parser.add_argument('--rangeIteration', type=int, help='', default=0)
     parser.add_argument('--rangeBlocksCount', type=int, help='', default=1)
+    parser.add_argument('--verboseLevel', type=str, default='info', help='Verbosity level (fatal, error, warning, info, debug, trace)')
     args, _ = parser.parse_known_args()
+
+    # Python logging has no trace level
+    logging.basicConfig(level="DEBUG" if args.verboseLevel == "trace" else args.verboseLevel.upper())
 
     compute_descriptors(inputSfMData=args.inputSfMData,
                         imageSize=args.imageSize,
