@@ -1,4 +1,4 @@
-__version__ = "1.0"
+__version__ = "2.0"
 
 from pathlib import Path
 from meshroom.core import desc
@@ -8,9 +8,10 @@ class MegalocImageMatching(desc.CommandLineNode):
 
     category = "MegaLoc"
     documentation = """
-    Build an image pairs list from two folders of MegaLoc descriptors (output of MegalocImageDescripting).
-    Each view of the first folder is paired with its most similar views of the second folder.
-    Use the same folder twice to match a set of views against itself.
+    Build an image pairs list between the views of two sfmData, using MegaLoc descriptors (output of MegalocImageDescripting).
+    Each view of sfmData A is paired with its most similar views of sfmData B.
+    Use the same sfmData twice to match a set of views against itself.
+    Descriptors are looked up in the features folders, which may contain descriptors of other views.
     """
     gpu = desc.Level.INTENSIVE
 
@@ -20,16 +21,27 @@ class MegalocImageMatching(desc.CommandLineNode):
 
     inputs = [
         desc.File(
-            name="descriptorsFolderA",
-            label="Descriptors Folder A",
-            description="Folder of MegaLoc descriptors of the query views.",
+            name="inputSfMDataA",
+            label="SfMData A",
+            description="SfMData of the query views.",
             value="",
         ),
         desc.File(
-            name="descriptorsFolderB",
-            label="Descriptors Folder B",
-            description="Folder of MegaLoc descriptors of the views to match against.",
+            name="inputSfMDataB",
+            label="SfMData B",
+            description="SfMData of the views to match against.",
             value="",
+        ),
+        desc.ListAttribute(
+            elementDesc=desc.File(
+                name="featuresFolder",
+                label="Features Folder",
+                description="Folder of MegaLoc descriptors (output of MegalocImageDescripting).",
+                value="",
+            ),
+            name="featuresFolders",
+            label="Features Folders",
+            description="Folders of MegaLoc descriptors. They must contain the descriptors of all the views of both sfmData, and may contain others.",
         ),
         desc.IntParam(
             name="nbNeighbors",

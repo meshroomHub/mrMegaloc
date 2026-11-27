@@ -11,8 +11,9 @@ Meshroom plugin using [MegaLoc](https://github.com/gmberton/MegaLoc) global imag
   Cosine similarity between two views is the dot product of their descriptors.
 
 **MegalocImageMatching** (category `MegaLoc`)
-- `descriptorsFolderA`, `descriptorsFolderB`: two MegalocImageDescripting output folders
-  (use the same folder twice to match a set of views against itself).
+- `inputSfMDataA`, `inputSfMDataB`: the views to pair (use the same sfmData twice to match a set of views against itself).
+- `featuresFolders`: MegalocImageDescripting output folders. Descriptors may have been computed on a superset of the
+  views: only the views of the two sfmData are matched. A view without descriptor is an error.
 - `nbNeighbors`: each view of A is paired with its N most similar views of B (a view is never paired with itself).
 - `minSimilarity`: pairs with a lower cosine similarity are dropped. The scale depends on the dataset
   (unrelated views are usually around 0-0.05, hard true pairs can be under 0.1): check the log before raising it.
