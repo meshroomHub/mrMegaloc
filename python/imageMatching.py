@@ -31,6 +31,7 @@ def load_descriptors(viewIds, folders):
     Returns:
     (N, D) descriptors tensor, in the order of viewIds
     """
+    folders = [f for f in folders if f.strip()]
     descriptors = []
     missing = []
     for viewId in viewIds:
@@ -84,24 +85,28 @@ def compute_pairs(viewIdsA, descriptorsA, viewIdsB, descriptorsB, nbNeighbors, m
         logging.debug(f"View {viewIdsA[i]}: " + ", ".join(
             f"{viewIdsB[int(j)]} ({value:.3f})" for value, j in zip(values[i], row) if np.isfinite(value)))
         for value, j in zip(values[i], row):
-            if value < minSimilarity:
-                continue
             a, b = viewIdsA[i], viewIdsB[int(j)]
+            if a == b or value < minSimilarity:
+                continue
             pairs.add((min(a, b), max(a, b)))
 
     return pairs
 
 def image_matching(inputSfMDataA, inputSfMDataB, featuresFolders, nbNeighbors, minSimilarity, output):
     viewIdsA = get_view_ids(inputSfMDataA)
-    viewIdsB = get_view_ids(inputSfMDataB)
     descriptorsA = load_descriptors(viewIdsA, featuresFolders)
-    descriptorsB = load_descriptors(viewIdsB, featuresFolders)
+    if os.path.realpath(inputSfMDataB) == os.path.realpath(inputSfMDataA):
+        viewIdsB, descriptorsB = viewIdsA, descriptorsA
+    else:
+        viewIdsB = get_view_ids(inputSfMDataB)
+        descriptorsB = load_descriptors(viewIdsB, featuresFolders)
     logging.info(f"Loaded {len(viewIdsA)} descriptors for {inputSfMDataA}")
     logging.info(f"Loaded {len(viewIdsB)} descriptors for {inputSfMDataB}")
 
     pairs = compute_pairs(viewIdsA, descriptorsA, viewIdsB, descriptorsB, nbNeighbors, minSimilarity)
     logging.info(f"Writing {len(pairs)} pairs to {output}")
 
+    os.makedirs(os.path.dirname(os.path.abspath(output)), exist_ok=True)
     if not avmic.savePairsToFile(output, pairs):
         raise RuntimeError(f"Unable to write pairs file {output}")
 
