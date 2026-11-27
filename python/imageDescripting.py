@@ -12,10 +12,10 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-IMAGENET_MEAN = [0.485, 0.456, 0.406]
-IMAGENET_STD = [0.229, 0.224, 0.225]
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406], device=device).view(1, 3, 1, 1)
+IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225], device=device).view(1, 3, 1, 1)
 
 
 def get_views_from_sfmdata(inputSfMData):
@@ -43,7 +43,8 @@ def load_model():
 def load_image_tensor(path, imageSize):
     """
     Load an image using pyalicevision and apply the MegaLoc preprocessing
-    (ImageNet normalization, square resize).
+    (square resize, ImageNet normalization).
+    imageSize is rounded to a multiple of 14 (MegaLoc patch size), as MegaLoc would resize again otherwise.
     """
     image = avimage.Image_RGBColor()
     optRead = avimage.ImageReadOptions(avimage.EImageColorSpace_SRGB)
@@ -52,11 +53,10 @@ def load_image_tensor(path, imageSize):
     array = np.asarray(image.getNumpyArray(), dtype=np.float32) / 255.0
     tensor = torch.from_numpy(array).permute(2, 0, 1)[None].to(device)
 
-    mean = torch.tensor(IMAGENET_MEAN, device=device).view(1, 3, 1, 1)
-    std = torch.tensor(IMAGENET_STD, device=device).view(1, 3, 1, 1)
-    tensor = (tensor - mean) / std
-
-    return F.interpolate(tensor, size=(imageSize, imageSize), mode="bilinear", antialias=True, align_corners=False)
+    imageSize = max(14, round(imageSize / 14) * 14)
+    # Resizing first is equivalent (the normalization is per-channel affine) and cheaper
+    tensor = F.interpolate(tensor, size=(imageSize, imageSize), mode="bilinear", antialias=True, align_corners=False)
+    return (tensor - IMAGENET_MEAN) / IMAGENET_STD
 
 def compute_descriptors(inputSfMData, imageSize, outputFolder, rangeIteration, rangeBlocksCount):
     """
