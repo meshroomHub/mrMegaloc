@@ -42,6 +42,7 @@ class MegalocImageMatching(desc.CommandLineNode):
             name="featuresFolders",
             label="Features Folders",
             description="Folders of MegaLoc descriptors. They must contain the descriptors of all the views of both sfmData, and may contain others.",
+            exposed=True,
         ),
         desc.IntParam(
             name="nbNeighbors",

@@ -24,7 +24,7 @@ def get_views_from_sfmdata(inputSfMData):
     """
     data = avsfmData.SfMData()
     if not avsfmDataIO.load(data, inputSfMData, avsfmDataIO.VIEWS):
-        raise RuntimeError("Error with sfm data")
+        raise RuntimeError(f"Unable to load sfmData {inputSfMData}")
 
     views = sorted(data.getViews().items(), key=lambda v: v[1].getFrameId())
     return {key: view.getImage().getImagePath() for (key, view) in views}
@@ -68,12 +68,12 @@ def compute_descriptors(inputSfMData, imageSize, outputFolder, rangeIteration, r
 
     (valid, rangeStart, rangeEnd) = avsys.rangeComputation(rangeIteration, rangeBlocksCount, len(viewIds))
     if not valid:
-        logging.error("Range is out of bounds.")
-        return
+        raise RuntimeError(f"Range is out of bounds (iteration {rangeIteration}, {rangeBlocksCount} blocks, {len(viewIds)} views)")
 
     viewIds = viewIds[rangeStart:rangeEnd]
     logging.info(f"Processing views {rangeStart} to {rangeEnd}")
 
+    os.makedirs(outputFolder, exist_ok=True)
     model = load_model()
 
     for viewId in viewIds:
