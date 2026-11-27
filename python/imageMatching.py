@@ -73,7 +73,16 @@ def compute_pairs(viewIdsA, descriptorsA, viewIdsB, descriptorsB, nbNeighbors, m
     values = values.cpu().numpy()
     neighbors = neighbors.cpu().numpy()
 
+    # Similarity statistics, to help choosing minSimilarity
+    finite = values[np.isfinite(values)]
+    top1 = values[:, 0][np.isfinite(values[:, 0])]
+    if top1.size:
+        logging.info(f"Top-1 similarity: min {top1.min():.3f}, median {np.median(top1):.3f}, max {top1.max():.3f}")
+        logging.info(f"Top-{k} similarity: min {finite.min():.3f}, median {np.median(finite):.3f}, max {finite.max():.3f}")
+
     for i, row in enumerate(neighbors):
+        logging.debug(f"View {viewIdsA[i]}: " + ", ".join(
+            f"{viewIdsB[int(j)]} ({value:.3f})" for value, j in zip(values[i], row) if np.isfinite(value)))
         for value, j in zip(values[i], row):
             if value < minSimilarity:
                 continue
